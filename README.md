@@ -2,7 +2,23 @@
 
 Учебный проект — веб-обёртка над рекламным трекером Keitaro.
 
-> 🚧 **В разработке** 🛠️
+<p>
+  <img src="https://img.shields.io/badge/status-in%20progress-yellow?style=for-the-badge" alt="Status" />
+  <img src="https://img.shields.io/badge/milestone-M2%20of%204-1f6feb?style=for-the-badge" alt="Milestone" />
+  <img src="https://img.shields.io/github/issues/blinkopec/keitaro-wrapper?style=for-the-badge" alt="Open issues" />
+  <img src="https://img.shields.io/github/last-commit/blinkopec/keitaro-wrapper?style=for-the-badge" alt="Last commit" />
+</p>
+
+## План работ
+
+| Этап | Дедлайн | Задачи |
+| --- | --- | --- |
+| [M1. Инфраструктура](https://github.com/blinkopec/keitaro-wrapper/milestone/1) | 17.11 | [![M1](https://img.shields.io/github/milestones/progress/blinkopec/keitaro-wrapper/1?style=flat-square&label=%20)](https://github.com/blinkopec/keitaro-wrapper/milestone/1) |
+| [M2. Интеграция с Keitaro API](https://github.com/blinkopec/keitaro-wrapper/milestone/2) | 18.11 | [![M2](https://img.shields.io/github/milestones/progress/blinkopec/keitaro-wrapper/2?style=flat-square&label=%20)](https://github.com/blinkopec/keitaro-wrapper/milestone/2) |
+| [M3. Создаватор кампаний](https://github.com/blinkopec/keitaro-wrapper/milestone/3) | 20.11 | [![M3](https://img.shields.io/github/milestones/progress/blinkopec/keitaro-wrapper/3?style=flat-square&label=%20)](https://github.com/blinkopec/keitaro-wrapper/milestone/3) |
+| [M4. Редактор офферов](https://github.com/blinkopec/keitaro-wrapper/milestone/4) | 22.11 | [![M4](https://img.shields.io/github/milestones/progress/blinkopec/keitaro-wrapper/4?style=flat-square&label=%20)](https://github.com/blinkopec/keitaro-wrapper/milestone/4) |
+
+Все задачи — в [GitHub Project](https://github.com/users/blinkopec/projects/3).
 
 ## Стек
 
