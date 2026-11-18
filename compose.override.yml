@@ -1,0 +1,25 @@
+# Переопределения для локальной разработки.
+# Подхватывается автоматически при `docker compose up`.
+
+services:
+  backend:
+    build:
+      target: base
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+      - --reload
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/tests:/app/tests
+    environment:
+      FASTAPI_ENV: development
+
+  frontend:
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
