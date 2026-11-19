@@ -1,4 +1,5 @@
 import json
+from collections.abc import AsyncGenerator
 
 import httpx
 import pytest
@@ -10,7 +11,7 @@ BASE = "https://keitaro.test"
 
 
 @pytest.fixture
-async def client() -> KeitaroClient:
+async def client() -> AsyncGenerator[KeitaroClient, None]:
     c = KeitaroClient(base_url=BASE, api_key="test-key")
     yield c
     await c.aclose()
