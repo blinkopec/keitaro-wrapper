@@ -1,7 +1,9 @@
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field
+
+GOOGLE_URL = "https://google.com"
 
 
 class Campaign(BaseModel):
@@ -97,10 +99,86 @@ class TrafficSource(BaseModel):
 class CampaignCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    name: str
+    name: str = Field(min_length=1, max_length=255)
     domain_id: int
     group_id: int
     traffic_source_id: int
 
     def to_payload(self) -> dict[str, Any]:
         return self.model_dump()
+
+
+class CampaignRequest(BaseModel):
+    """Данные формы создания кампании."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    geo: str = Field(min_length=2, max_length=2, pattern=r"^[A-Z]{2}$")
+    offer_id: int = Field(gt=0)
+
+
+class StreamCreate(BaseModel):
+    """Тело запроса на создание потока."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    name: str
+    position: int
+    schema_: Annotated[str, Field(alias="schema")] = "redirect"
+    action_type: str = "http"
+    action_payload: str = ""
+
+    def to_payload(self) -> dict[str, Any]:
+        return self.model_dump(by_alias=True)
+
+
+class FilterCreate(BaseModel):
+    """Фильтр для вложения в поток при создании."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    mode: str
+    payload: list[str]
+
+    def to_payload(self) -> dict[str, Any]:
+        return self.model_dump()
+
+
+class OfferCreate(BaseModel):
+    """Оффер для вложения в поток при создании."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    offer_id: int
+    share: int = Field(ge=0, le=100)
+    state: str = "active"
+
+    def to_payload(self) -> dict[str, Any]:
+        return self.model_dump()
+
+
+def build_geo_redirect_stream(geo: str) -> dict[str, Any]:
+    """Поток 1: всех из указанной страны отправляем на Google."""
+    payload = StreamCreate(
+        name=f"Geo Filter ({geo}) -> Google",
+        position=1,
+        schema="redirect",
+        action_type="http",
+        action_payload=GOOGLE_URL,
+    ).to_payload()
+    payload["filters"] = [FilterCreate(name="country", mode="accept", payload=[geo]).to_payload()]
+    return payload
+
+
+def build_offer_stream(offer_id: int) -> dict[str, Any]:
+    """Поток 2: остальных отправляем на выбранный оффер."""
+    payload = StreamCreate(
+        name=f"Offer Stream (ID: {offer_id})",
+        position=2,
+        schema="landings",
+        action_type="http",
+        action_payload="",
+    ).to_payload()
+    payload["offers"] = [OfferCreate(offer_id=offer_id, share=100, state="active").to_payload()]
+    return payload

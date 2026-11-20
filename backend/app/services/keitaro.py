@@ -77,6 +77,9 @@ class KeitaroClient:
     async def get_streams(self, campaign_id: int) -> list[dict[str, Any]]:
         return await self._request("GET", f"/campaigns/{campaign_id}/streams")
 
+    async def create_stream(self, campaign_id: int, payload: dict[str, Any]) -> dict[str, Any]:
+        return await self._request("POST", f"/campaigns/{campaign_id}/streams", json=payload)
+
     async def get_domains(self) -> list[dict[str, Any]]:
         return await self._request("GET", "/domains")
 
