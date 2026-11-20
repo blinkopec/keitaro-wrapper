@@ -292,6 +292,7 @@ def test_traffic_source_parses() -> None:
 def test_campaign_create_dumps_payload() -> None:
     payload = CampaignCreate(
         name="MX test",
+        alias="mx_test",
         domain_id=1813,
         group_id=9799,
         traffic_source_id=836,
@@ -299,6 +300,7 @@ def test_campaign_create_dumps_payload() -> None:
 
     assert payload == {
         "name": "MX test",
+        "alias": "mx_test",
         "domain_id": 1813,
         "group_id": 9799,
         "traffic_source_id": 836,
@@ -309,6 +311,7 @@ def test_campaign_create_rejects_unknown_fields() -> None:
     with pytest.raises(ValidationError):
         CampaignCreate(
             name="MX test",
+            alias="mx_test",
             domain_id=1813,
             group_id=9799,
             traffic_source_id=836,
@@ -318,4 +321,4 @@ def test_campaign_create_rejects_unknown_fields() -> None:
 
 def test_campaign_create_requires_all_fields() -> None:
     with pytest.raises(ValidationError):
-        CampaignCreate(name="MX test", domain_id=1813)
+        CampaignCreate(name="MX test", alias="mx_test")

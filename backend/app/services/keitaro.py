@@ -62,8 +62,9 @@ class KeitaroClient:
 
         return response.json()
 
-    async def get_campaigns(self) -> list[dict[str, Any]]:
-        return await self._request("GET", "/campaigns")
+    async def get_campaigns(self, state: str | None = None) -> list[dict[str, Any]]:
+        params = {"state": state} if state else None
+        return await self._request("GET", "/campaigns", params=params)
 
     async def get_campaign(self, campaign_id: int) -> dict[str, Any]:
         return await self._request("GET", f"/campaigns/{campaign_id}")
@@ -77,8 +78,8 @@ class KeitaroClient:
     async def get_streams(self, campaign_id: int) -> list[dict[str, Any]]:
         return await self._request("GET", f"/campaigns/{campaign_id}/streams")
 
-    async def create_stream(self, campaign_id: int, payload: dict[str, Any]) -> dict[str, Any]:
-        return await self._request("POST", f"/campaigns/{campaign_id}/streams", json=payload)
+    async def create_stream(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return await self._request("POST", "/streams", json=payload)
 
     async def get_domains(self) -> list[dict[str, Any]]:
         return await self._request("GET", "/domains")

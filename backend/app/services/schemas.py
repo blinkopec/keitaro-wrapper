@@ -100,6 +100,7 @@ class CampaignCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str = Field(min_length=1, max_length=255)
+    alias: str = Field(min_length=1, max_length=255)
     domain_id: int
     group_id: int
     traffic_source_id: int

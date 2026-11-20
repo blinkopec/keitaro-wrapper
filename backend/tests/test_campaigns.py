@@ -6,6 +6,7 @@ from app.services.campaigns import (
     CAMPAIGN_PREFIX,
     create_campaign,
     next_campaign_name,
+    timestamped_campaign_name,
 )
 from app.services.keitaro import KeitaroClient
 
@@ -58,21 +59,19 @@ def test_next_name_ignores_similar_prefixes() -> None:
 async def test_create_campaign_returns_campaign(client: KeitaroClient) -> None:
     respx.get(f"{BASE}/admin_api/v1/campaigns").mock(return_value=Response(200, json=[]))
     respx.post(f"{BASE}/admin_api/v1/campaigns").mock(return_value=Response(200, json=RAW_CAMPAIGN))
-    respx.post(f"{BASE}/admin_api/v1/campaigns/999/streams").mock(
-        return_value=Response(200, json={"id": 1})
-    )
+    respx.post(f"{BASE}/admin_api/v1/streams").mock(return_value=Response(200, json={"id": 1}))
 
     campaign = await create_campaign(client, geo="MX", offer_id=18813)
 
     assert campaign.id == 999
-    assert campaign.name == f"{CAMPAIGN_PREFIX}1"
+    assert campaign.name.startswith(CAMPAIGN_PREFIX)
 
 
 @respx.mock
 async def test_create_campaign_builds_two_streams(client: KeitaroClient) -> None:
     respx.get(f"{BASE}/admin_api/v1/campaigns").mock(return_value=Response(200, json=[]))
     respx.post(f"{BASE}/admin_api/v1/campaigns").mock(return_value=Response(200, json=RAW_CAMPAIGN))
-    streams_route = respx.post(f"{BASE}/admin_api/v1/campaigns/999/streams").mock(
+    streams_route = respx.post(f"{BASE}/admin_api/v1/streams").mock(
         return_value=Response(200, json={"id": 1})
     )
 
@@ -87,7 +86,7 @@ async def test_first_stream_redirects_country_to_google(
 ) -> None:
     respx.get(f"{BASE}/admin_api/v1/campaigns").mock(return_value=Response(200, json=[]))
     respx.post(f"{BASE}/admin_api/v1/campaigns").mock(return_value=Response(200, json=RAW_CAMPAIGN))
-    streams_route = respx.post(f"{BASE}/admin_api/v1/campaigns/999/streams").mock(
+    streams_route = respx.post(f"{BASE}/admin_api/v1/streams").mock(
         return_value=Response(200, json={"id": 1})
     )
 
@@ -107,7 +106,7 @@ async def test_first_stream_redirects_country_to_google(
 async def test_second_stream_uses_offer(client: KeitaroClient) -> None:
     respx.get(f"{BASE}/admin_api/v1/campaigns").mock(return_value=Response(200, json=[]))
     respx.post(f"{BASE}/admin_api/v1/campaigns").mock(return_value=Response(200, json=RAW_CAMPAIGN))
-    streams_route = respx.post(f"{BASE}/admin_api/v1/campaigns/999/streams").mock(
+    streams_route = respx.post(f"{BASE}/admin_api/v1/streams").mock(
         return_value=Response(200, json={"id": 1})
     )
 
@@ -118,3 +117,18 @@ async def test_second_stream_uses_offer(client: KeitaroClient) -> None:
     assert '"position":2' in second
     assert '"offer_id":18813' in second
     assert '"share":100' in second
+
+
+def test_timestamped_name_has_prefix() -> None:
+    name = timestamped_campaign_name([])
+
+    assert name.startswith(CAMPAIGN_PREFIX)
+    assert len(name) > len(CAMPAIGN_PREFIX)
+
+
+def test_timestamped_name_avoids_collision() -> None:
+    first = timestamped_campaign_name([])
+    second = timestamped_campaign_name([first])
+
+    assert second != first
+    assert second.endswith("_2")
