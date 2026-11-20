@@ -39,9 +39,7 @@
       const detail = document.getElementById("detail")
       const message = document.getElementById("message")
 
-      let offersCache = []
-
-      function streamOffers(stream, campaignId, usedInCampaign) {
+      function streamOffers(stream, campaignId) {
         const total = stream.offers.reduce((sum, o) => sum + o.share, 0)
         const balanced = total === 100 && stream.offers.length > 0
         const rows = stream.offers
@@ -65,55 +63,21 @@
           )
           .join("")
 
-        if (stream.schema_ === "redirect") {
-          const redirectNote = stream.offers.length
-            ? `<p class="warn">Офферы в этом потоке не используются: схема redirect отправляет на URL.</p>`
-            : ""
-          return `
-            <div class="empty">
-              Поток редиректа — отправляет на <code>${escapeHtml(stream.action_payload || "URL")}</code>.
-              Офферы не используются.
-            </div>
-            ${redirectNote}`
+        if (!stream.offers.length) {
+          return '<p class="empty">Офферов нет</p>'
         }
 
-        const table = stream.offers.length
-          ? `<table>
-              <thead>
-                <tr><th>Offer ID</th><th>Доля</th><th>Статус</th><th></th></tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>`
-          : '<p class="empty">Офферов нет — поток ничего не покажет</p>'
-
-        const available = offersCache.filter((o) => !usedInCampaign.has(o.id))
-        const options = available.length
-          ? available
-              .map((o) => `<option value="${o.id}">${escapeHtml(o.name)} (id ${o.id})</option>`)
-              .join("")
-          : '<option value="">Нет доступных офферов</option>'
-
-        const addForm = `
-          <div class="add-offer">
-            <select data-add-select="${stream.id}" ${available.length ? "" : "disabled"}>
-              ${options}
-            </select>
-            <button
-              type="button"
-              data-action="add-offer"
-              data-campaign="${campaignId}"
-              data-stream="${stream.id}"
-              ${available.length ? "" : "disabled"}
-            >Add</button>
-          </div>`
-
         return `
-          ${table}
+          <table>
+            <thead>
+              <tr><th>Offer ID</th><th>Доля</th><th>Статус</th><th></th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
           <p class="hint">
             Сумма долей: <strong>${total}%</strong>
             ${balanced ? "" : ' <span class="warn">— не равна 100%</span>'}
-          </p>
-          ${addForm}`
+          </p>`
       }
 
       function streamFilters(stream) {
@@ -134,9 +98,6 @@
       function renderDetail(data) {
         const { campaign, streams } = data
         const sorted = [...streams].sort((a, b) => a.position - b.position)
-        const usedInCampaign = new Set(
-          streams.flatMap((s) => s.offers.map((o) => o.offer_id)),
-        )
 
         const streamsHtml = sorted
           .map(
@@ -150,7 +111,7 @@
                 </legend>
                 ${s.action_payload ? `<p class="hint">Редирект → <code>${escapeHtml(s.action_payload)}</code></p>` : ""}
                 ${streamFilters(s)}
-                ${streamOffers(s, campaign.id, usedInCampaign)}
+                ${streamOffers(s, campaign.id)}
               </fieldset>`,
           )
           .join("")
@@ -233,20 +194,8 @@
 
         setLoading(button, true, "…")
         try {
-          if (button.dataset.action === "remove-offer") {
-            await api(`${base}/${button.dataset.offer}`, { method: "DELETE" })
-            showMessage(message, "Оффер удалён, доли пересчитаны", "success")
-          } else {
-            const selectEl = detail.querySelector(
-              `select[data-add-select="${streamId}"]`,
-            )
-            if (!selectEl || !selectEl.value) return
-            await api(base, {
-              method: "POST",
-              body: JSON.stringify({ offer_id: Number(selectEl.value) }),
-            })
-            showMessage(message, "Оффер добавлен, доли пересчитаны", "success")
-          }
+          await api(`${base}/${button.dataset.offer}`, { method: "DELETE" })
+          showMessage(message, "Оффер удалён, доли пересчитаны", "success")
           await reloadDetail(campaignId)
         } catch (err) {
           showMessage(message, `Ошибка: ${err.message}`, "error")
@@ -256,16 +205,7 @@
 
       select.addEventListener("change", () => loadDetail(select.value))
 
-      async function init() {
-        try {
-          offersCache = await api("/offers/")
-        } catch {
-          offersCache = []
-        }
-        await loadCampaigns()
-      }
-
-      init()
+      loadCampaigns()
     </script>
   </body>
 </html>

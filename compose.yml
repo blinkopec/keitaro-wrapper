@@ -15,19 +15,3 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-
-  frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-    image: keitaro-wrapper-frontend:latest
-    restart: unless-stopped
-    ports:
-      - "5173:5173"
-    depends_on:
-      - backend
-    environment:
-      VITE_API_URL: http://localhost:8000
-
-volumes:
-  frontend-node-modules:

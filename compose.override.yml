@@ -3,8 +3,6 @@
 
 services:
   backend:
-    build:
-      target: base
     command:
       - uvicorn
       - app.main:app
@@ -18,8 +16,3 @@ services:
       - ./backend/tests:/app/tests
     environment:
       FASTAPI_ENV: development
-
-  frontend:
-    volumes:
-      - ./frontend:/app
-      - frontend-node-modules:/app/node_modules
