@@ -3,103 +3,126 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Keitaro Wrapper</title>
-    <style>
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        padding: 2rem 1rem;
-        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-        line-height: 1.6;
-        color: #1a1a1a;
-        background: #f7f7f8;
-      }
-      main {
-        max-width: 760px;
-        margin: 0 auto;
-        padding: 2rem;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
-      }
-      h1 {
-        margin-top: 0;
-        font-size: 1.6rem;
-      }
-      .subtitle {
-        color: #666;
-        margin-bottom: 2rem;
-      }
-      ul {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 2rem;
-      }
-      li {
-        border: 1px solid #e5e5e5;
-        border-radius: 8px;
-        margin-bottom: 0.75rem;
-      }
-      li a {
-        display: block;
-        padding: 1rem 1.25rem;
-        text-decoration: none;
-        color: inherit;
-      }
-      li a:hover {
-        background: #fafafa;
-      }
-      .title {
-        font-weight: 600;
-        color: #059669;
-      }
-      .desc {
-        color: #666;
-        font-size: 0.9rem;
-      }
-      .status {
-        font-size: 0.85rem;
-        color: #999;
-      }
-      code {
-        background: #f2f2f2;
-        padding: 0.15rem 0.4rem;
-        border-radius: 4px;
-        font-size: 0.9em;
-      }
-    </style>
+    <title>Создание кампании — Keitaro Wrapper</title>
+    <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <main>
-      <h1>Keitaro Wrapper</h1>
-      <p class="subtitle">Веб-обёртка над рекламным трекером Keitaro</p>
+      <header>
+        <h1>Создание кампании</h1>
+        <nav>
+          <a href="/" class="active">Создать</a>
+          <a href="/edit.html">Редактор</a>
+          <a href="/docs" target="_blank">API</a>
+        </nav>
+      </header>
 
-      <ul>
-        <li>
-          <a href="/docs">
-            <div class="title">Документация API</div>
-            <div class="desc">Swagger UI, все эндпоинты и схемы</div>
-          </a>
-        </li>
-        <li>
-          <a href="/api/v1/health-check">
-            <div class="title">Проверка доступности</div>
-            <div class="desc"><code>GET /api/v1/health-check</code></div>
-          </a>
-        </li>
-        <li>
-          <a href="/redoc">
-            <div class="title">Документация (ReDoc)</div>
-            <div class="desc">Альтернативный просмотр API</div>
-          </a>
-        </li>
-      </ul>
+      <div id="message" class="message"></div>
 
-      <p class="status">
-        Интерфейс в разработке. API доступен по адресу <code>/api/v1</code>.
-      </p>
+      <form id="create-form">
+        <fieldset>
+          <legend>Параметры</legend>
+
+          <div class="field">
+            <label for="geo">Гео (ISO-2)</label>
+            <input
+              type="text"
+              id="geo"
+              name="geo"
+              placeholder="MX"
+              maxlength="2"
+              required
+              autocomplete="off"
+            />
+            <div class="hint">Двухбуквенный код страны: MX, AU, RO</div>
+          </div>
+
+          <div class="field">
+            <label for="offer">Оффер</label>
+            <select id="offer" name="offer_id" required>
+              <option value="">Загрузка…</option>
+            </select>
+            <div class="hint">Первый поток для этого гео уйдёт на Google, второй — на оффер</div>
+          </div>
+        </fieldset>
+
+        <button type="submit" id="submit-btn">Создать кампанию</button>
+      </form>
+
+      <div id="result"></div>
     </main>
+
+    <script src="/common.js"></script>
+    <script>
+      const form = document.getElementById("create-form")
+      const geoInput = document.getElementById("geo")
+      const offerSelect = document.getElementById("offer")
+      const submitBtn = document.getElementById("submit-btn")
+      const message = document.getElementById("message")
+      const result = document.getElementById("result")
+
+      geoInput.addEventListener("input", () => {
+        geoInput.value = geoInput.value.toUpperCase().replace(/[^A-Z]/g, "")
+      })
+
+      async function loadOffers() {
+        try {
+          const offers = await api("/offers/")
+          if (!offers.length) {
+            offerSelect.innerHTML = '<option value="">Офферов нет</option>'
+            return
+          }
+          offerSelect.innerHTML = offers
+            .map(
+              (o) =>
+                `<option value="${o.id}">${escapeHtml(o.name)} (id ${o.id})</option>`,
+            )
+            .join("")
+        } catch (err) {
+          offerSelect.innerHTML = '<option value="">Ошибка загрузки</option>'
+          showMessage(message, `Не удалось загрузить офферы: ${err.message}`, "error")
+        }
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault()
+        clearMessage(message)
+        result.innerHTML = ""
+        setLoading(submitBtn, true, "Создание…")
+
+        try {
+          const campaign = await api("/campaigns/", {
+            method: "POST",
+            body: JSON.stringify({
+              geo: geoInput.value,
+              offer_id: Number(offerSelect.value),
+            }),
+          })
+          showMessage(
+            message,
+            `Кампания создана: ${campaign.name} (id ${campaign.id})`,
+            "success",
+          )
+          result.innerHTML = `
+            <table>
+              <tbody>
+                <tr><th>ID</th><td>${campaign.id}</td></tr>
+                <tr><th>Название</th><td>${escapeHtml(campaign.name)}</td></tr>
+                <tr><th>Домен</th><td>${escapeHtml(campaign.domain || campaign.domain_id)}</td></tr>
+                <tr><th>Статус</th><td><span class="badge">${escapeHtml(campaign.state)}</span></td></tr>
+              </tbody>
+            </table>
+            <p><a href="/edit.html?id=${campaign.id}">Открыть в редакторе →</a></p>
+          `
+          form.reset()
+        } catch (err) {
+          showMessage(message, `Ошибка: ${err.message}`, "error")
+        } finally {
+          setLoading(submitBtn, false)
+        }
+      })
+
+      loadOffers()
+    </script>
   </body>
 </html>

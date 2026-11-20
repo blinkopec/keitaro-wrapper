@@ -16,7 +16,7 @@ class Campaign(BaseModel):
     type: str
     position: int
     group_id: int
-    domain_id: int
+    domain_id: int | None = None
     traffic_source_id: int
     domain: str | None = None
     created_at: datetime | None = None
@@ -183,3 +183,10 @@ def build_offer_stream(offer_id: int) -> dict[str, Any]:
     ).to_payload()
     payload["offers"] = [OfferCreate(offer_id=offer_id, share=100, state="active").to_payload()]
     return payload
+
+
+class CampaignDetail(BaseModel):
+    """Кампания и её потоки."""
+
+    campaign: Campaign
+    streams: list[Stream] = Field(default_factory=list)
