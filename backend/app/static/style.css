@@ -241,3 +241,21 @@ code {
   border-radius: 4px;
   font-size: 0.9em;
 }
+
+.add-offer {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.add-offer select {
+  flex: 1;
+}
+
+.warn {
+  color: var(--danger);
+  font-weight: 600;
+}
