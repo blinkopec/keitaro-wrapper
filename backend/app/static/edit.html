@@ -41,7 +41,7 @@
 
       let offersCache = []
 
-      function streamOffers(stream, campaignId) {
+      function streamOffers(stream, campaignId, usedInCampaign) {
         const total = stream.offers.reduce((sum, o) => sum + o.share, 0)
         const balanced = total === 100 && stream.offers.length > 0
         const rows = stream.offers
@@ -65,6 +65,18 @@
           )
           .join("")
 
+        if (stream.schema_ === "redirect") {
+          const redirectNote = stream.offers.length
+            ? `<p class="warn">Офферы в этом потоке не используются: схема redirect отправляет на URL.</p>`
+            : ""
+          return `
+            <div class="empty">
+              Поток редиректа — отправляет на <code>${escapeHtml(stream.action_payload || "URL")}</code>.
+              Офферы не используются.
+            </div>
+            ${redirectNote}`
+        }
+
         const table = stream.offers.length
           ? `<table>
               <thead>
@@ -74,9 +86,7 @@
             </table>`
           : '<p class="empty">Офферов нет — поток ничего не покажет</p>'
 
-        const available = offersCache.filter(
-          (o) => !stream.offers.some((existing) => existing.offer_id === o.id),
-        )
+        const available = offersCache.filter((o) => !usedInCampaign.has(o.id))
         const options = available.length
           ? available
               .map((o) => `<option value="${o.id}">${escapeHtml(o.name)} (id ${o.id})</option>`)
@@ -124,6 +134,9 @@
       function renderDetail(data) {
         const { campaign, streams } = data
         const sorted = [...streams].sort((a, b) => a.position - b.position)
+        const usedInCampaign = new Set(
+          streams.flatMap((s) => s.offers.map((o) => o.offer_id)),
+        )
 
         const streamsHtml = sorted
           .map(
@@ -137,7 +150,7 @@
                 </legend>
                 ${s.action_payload ? `<p class="hint">Редирект → <code>${escapeHtml(s.action_payload)}</code></p>` : ""}
                 ${streamFilters(s)}
-                ${streamOffers(s, campaign.id)}
+                ${streamOffers(s, campaign.id, usedInCampaign)}
               </fieldset>`,
           )
           .join("")
