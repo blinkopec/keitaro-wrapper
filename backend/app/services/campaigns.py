@@ -1,4 +1,3 @@
-import re
 from datetime import UTC, datetime
 
 from app.config import settings
@@ -11,13 +10,6 @@ from app.services.schemas import (
 )
 
 CAMPAIGN_PREFIX = "test_sinelnikov_campaign"
-
-
-def next_campaign_name(existing_names: list[str]) -> str:
-    """Подбирает следующее свободное имя по порядку."""
-    pattern = re.compile(rf"^{CAMPAIGN_PREFIX}(\d+)$")
-    numbers = [int(match.group(1)) for name in existing_names if (match := pattern.match(name))]
-    return f"{CAMPAIGN_PREFIX}{max(numbers, default=0) + 1}"
 
 
 def timestamped_campaign_name(existing_names: list[str]) -> str:

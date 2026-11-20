@@ -5,7 +5,6 @@ from httpx import Response
 from app.services.campaigns import (
     CAMPAIGN_PREFIX,
     create_campaign,
-    next_campaign_name,
     timestamped_campaign_name,
 )
 from app.services.keitaro import KeitaroClient
@@ -31,28 +30,6 @@ async def client() -> object:
     c = KeitaroClient(base_url=BASE, api_key="test-key")
     yield c
     await c.aclose()
-
-
-def test_next_name_starts_from_one() -> None:
-    assert next_campaign_name([]) == f"{CAMPAIGN_PREFIX}1"
-
-
-def test_next_name_increments_existing() -> None:
-    names = [f"{CAMPAIGN_PREFIX}1", f"{CAMPAIGN_PREFIX}2"]
-
-    assert next_campaign_name(names) == f"{CAMPAIGN_PREFIX}3"
-
-
-def test_next_name_ignores_foreign_campaigns() -> None:
-    names = ["test_banar_campaing4", "other", f"{CAMPAIGN_PREFIX}5"]
-
-    assert next_campaign_name(names) == f"{CAMPAIGN_PREFIX}6"
-
-
-def test_next_name_ignores_similar_prefixes() -> None:
-    names = [f"{CAMPAIGN_PREFIX}7_extra", f"{CAMPAIGN_PREFIX}tmp"]
-
-    assert next_campaign_name(names) == f"{CAMPAIGN_PREFIX}1"
 
 
 @respx.mock
