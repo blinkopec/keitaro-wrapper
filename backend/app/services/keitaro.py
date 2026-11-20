@@ -74,6 +74,18 @@ class KeitaroClient:
     async def get_offers(self) -> list[dict[str, Any]]:
         return await self._request("GET", "/offers")
 
+    async def get_streams(self, campaign_id: int) -> list[dict[str, Any]]:
+        return await self._request("GET", f"/campaigns/{campaign_id}/streams")
+
+    async def get_domains(self) -> list[dict[str, Any]]:
+        return await self._request("GET", "/domains")
+
+    async def get_groups(self, group_type: str) -> list[dict[str, Any]]:
+        return await self._request("GET", "/groups", params={"type": group_type})
+
+    async def get_traffic_sources(self) -> list[dict[str, Any]]:
+        return await self._request("GET", "/traffic_sources")
+
 
 def create_keitaro_client() -> KeitaroClient | None:
     from app.config import settings

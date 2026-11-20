@@ -110,3 +110,41 @@ async def test_connection_error_raises_keitaro_error(client: KeitaroClient) -> N
     with pytest.raises(KeitaroError) as exc_info:
         await client.get_campaigns()
     assert "connection" in str(exc_info.value).lower()
+
+
+@respx.mock
+async def test_get_streams_uses_campaign_path(client: KeitaroClient) -> None:
+    route = respx.get(f"{BASE}/admin_api/v1/campaigns/42/streams").mock(
+        return_value=httpx.Response(200, json=[{"id": 1, "position": 1}])
+    )
+    streams = await client.get_streams(42)
+    assert streams[0]["id"] == 1
+    assert route.called
+
+
+@respx.mock
+async def test_get_domains(client: KeitaroClient) -> None:
+    respx.get(f"{BASE}/admin_api/v1/domains").mock(
+        return_value=httpx.Response(200, json=[{"id": 1813, "name": "example.com"}])
+    )
+    domains = await client.get_domains()
+    assert domains[0]["id"] == 1813
+
+
+@respx.mock
+async def test_get_groups_sends_type_param(client: KeitaroClient) -> None:
+    route = respx.get(f"{BASE}/admin_api/v1/groups", params={"type": "campaigns"}).mock(
+        return_value=httpx.Response(200, json=[{"id": 9799, "name": "group"}])
+    )
+    groups = await client.get_groups("campaigns")
+    assert groups[0]["id"] == 9799
+    assert route.calls.last.request.url.params["type"] == "campaigns"
+
+
+@respx.mock
+async def test_get_traffic_sources(client: KeitaroClient) -> None:
+    respx.get(f"{BASE}/admin_api/v1/traffic_sources").mock(
+        return_value=httpx.Response(200, json=[{"id": 836, "name": "FORTESTS"}])
+    )
+    sources = await client.get_traffic_sources()
+    assert sources[0]["name"] == "FORTESTS"
