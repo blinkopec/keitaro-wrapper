@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keitaro Wrapper</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 2rem 1rem;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        line-height: 1.6;
+        color: #1a1a1a;
+        background: #f7f7f8;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+      }
+      h1 {
+        margin-top: 0;
+        font-size: 1.6rem;
+      }
+      .subtitle {
+        color: #666;
+        margin-bottom: 2rem;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 2rem;
+      }
+      li {
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+      }
+      li a {
+        display: block;
+        padding: 1rem 1.25rem;
+        text-decoration: none;
+        color: inherit;
+      }
+      li a:hover {
+        background: #fafafa;
+      }
+      .title {
+        font-weight: 600;
+        color: #059669;
+      }
+      .desc {
+        color: #666;
+        font-size: 0.9rem;
+      }
+      .status {
+        font-size: 0.85rem;
+        color: #999;
+      }
+      code {
+        background: #f2f2f2;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Keitaro Wrapper</h1>
+      <p class="subtitle">Веб-обёртка над рекламным трекером Keitaro</p>
+
+      <ul>
+        <li>
+          <a href="/docs">
+            <div class="title">Документация API</div>
+            <div class="desc">Swagger UI, все эндпоинты и схемы</div>
+          </a>
+        </li>
+        <li>
+          <a href="/api/v1/health-check">
+            <div class="title">Проверка доступности</div>
+            <div class="desc"><code>GET /api/v1/health-check</code></div>
+          </a>
+        </li>
+        <li>
+          <a href="/redoc">
+            <div class="title">Документация (ReDoc)</div>
+            <div class="desc">Альтернативный просмотр API</div>
+          </a>
+        </li>
+      </ul>
+
+      <p class="status">
+        Интерфейс в разработке. API доступен по адресу <code>/api/v1</code>.
+      </p>
+    </main>
+  </body>
+</html>

@@ -1,9 +1,11 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api.main import api_router
 from app.config import settings
@@ -69,3 +71,6 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+STATIC_DIR = Path(__file__).parent / "static"
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
