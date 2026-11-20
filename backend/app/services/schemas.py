@@ -159,6 +159,14 @@ class OfferCreate(BaseModel):
         return self.model_dump()
 
 
+class OfferAddRequest(BaseModel):
+    """Запрос на добавление оффера: доля пересчитывается автоматически."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    offer_id: int
+
+
 def build_geo_redirect_stream(geo: str) -> dict[str, Any]:
     """Поток 1: всех из указанной страны отправляем на Google."""
     payload = StreamCreate(

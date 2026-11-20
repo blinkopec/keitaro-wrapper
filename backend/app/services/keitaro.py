@@ -78,6 +78,12 @@ class KeitaroClient:
     async def get_streams(self, campaign_id: int) -> list[dict[str, Any]]:
         return await self._request("GET", f"/campaigns/{campaign_id}/streams")
 
+    async def get_stream(self, stream_id: int) -> dict[str, Any]:
+        return await self._request("GET", f"/streams/{stream_id}")
+
+    async def update_stream(self, stream_id: int, payload: dict[str, Any]) -> dict[str, Any]:
+        return await self._request("PUT", f"/streams/{stream_id}", json=payload)
+
     async def create_stream(self, payload: dict[str, Any]) -> dict[str, Any]:
         return await self._request("POST", "/streams", json=payload)
 
