@@ -247,3 +247,16 @@ code {
   color: var(--danger);
   font-weight: 600;
 }
+
+.add-offer {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.add-offer select {
+  flex: 1;
+}
